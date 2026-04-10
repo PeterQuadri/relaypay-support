@@ -1,8 +1,6 @@
 /**
  * RelayPay Security Proxy — Vercel Serverless Function
  * ==================================================
- * This function acts as a "Gatekeeper" to prevent the n8n WEBHOOK_SECRET 
- * from being exposed to the public browser.
  */
 
 export default async function handler(req, res) {
@@ -20,24 +18,24 @@ export default async function handler(req, res) {
     return;
   }
 
-  // 2. Extract the target webhook path from query params (e.g., /api/proxy?path=relaypay-analytics)
+  // 2. Extract the target path
   const { path } = req.query;
   if (!path) {
     return res.status(400).json({ error: 'Missing "path" query parameter.' });
   }
 
-  // 3. Inject the private Secret from Vercel Environment Variables
+  // 3. Load the Secret from Environment Variables FIRST
   const secret = process.env.WEBHOOK_SECRET;
   
   if (!secret) {
-     console.error("WEBHOOK_SECRET is not set in Vercel Environment Variables.");
+     console.error("WEBHOOK_SECRET is not set in Vercel settings.");
   }
 
-  // 4. Construct the n8n URL
+  // 4. Construct the n8n URL with the token injected
   const n8nBaseUrl = "https://cohort2pod3.app.n8n.cloud/webhook";
   const targetUrl = `${n8nBaseUrl}/${path}?token=${encodeURIComponent(secret || '')}`;
 
-  console.log(`[Proxy] Forwarding to: ${n8nBaseUrl}/${path}?token=***REDACTED***`);
+  console.log(`[Proxy] Forwarding to n8n: ${path}`);
 
   try {
     // 5. Forward the request to n8n
@@ -50,7 +48,7 @@ export default async function handler(req, res) {
       body: req.method !== 'GET' && req.method !== 'OPTIONS' ? JSON.stringify(req.body) : undefined,
     });
 
-    // 6. Handle the response safely, even if n8n returns an error string instead of JSON
+    // 6. Handle the response safely (JSON or Text)
     const contentType = response.headers.get("content-type");
     let responseBody;
     
@@ -60,7 +58,6 @@ export default async function handler(req, res) {
       responseBody = { message: await response.text() };
     }
     
-    // 7. Return n8n's status and body to the browser
     return res.status(response.status).json(responseBody);
 
   } catch (error) {
