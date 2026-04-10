@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RelayPay Support Analytics</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230A2463'/><text x='5' y='24' font-size='22' font-family='sans-serif' fill='white' font-weight='700'>R</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ---- Brand Tokens -------------------------------------------------- */
+    :root {
+      --blue-primary:   #0A2463;
+      --blue-accent:    #1E7AC5;
+      --bg:             #F5F6F8;
+      --surface:        #FFFFFF;
+      --border:         #DDE1E7;
+      --text-primary:   #111827;
+      --text-muted:     #6B7280;
+      --text-error:     #DC2626;
+      --radius:         10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      padding: 40px 24px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ---- Login Gate ---------------------------------------------------- */
+    #loginGate {
+      max-width: 400px;
+      margin: 100px auto;
+      background: var(--surface);
+      padding: 40px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    #loginGate h2 { color: var(--blue-primary); margin-bottom: 24px; }
+    #loginGate input {
+      width: 100%; padding: 12px; margin-bottom: 16px;
+      font-size: 16px; border: 1px solid var(--border); border-radius: 6px;
+    }
+    #loginGate button {
+      width: 100%; padding: 12px; background: var(--blue-primary);
+      color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;
+    }
+
+    /* ---- Dashboard ----------------------------------------------------- */
+    #dashboard { display: none; }
+
+    .header {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 32px;
+    }
+    .header img { height: 32px; }
+    .header h1 { font-size: 24px; color: var(--blue-primary); }
+
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--surface); padding: 24px;
+      border-radius: var(--radius); border: 1px solid var(--border);
+    }
+    .stat-label { font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
+    .stat-value { font-size: 32px; font-weight: 700; color: var(--blue-primary); }
+    .stat-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+    .table-container {
+      background: var(--surface); border-radius: var(--radius);
+      border: 1px solid var(--border); overflow-x: auto;
+      max-height: 600px; overflow-y: auto;
+    }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 16px; border-bottom: 1px solid var(--border); }
+    th { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; background: #FAFAFB; position: sticky; top: 0; z-index: 1; box-shadow: 0 1px 0 var(--border); }
+    td { font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block; padding: 4px 8px; border-radius: 4px;
+      font-size: 12px; font-weight: 500;
+    }
+    .badge.yes { background: #DCFCE7; color: #16A34A; }
+    .badge.no { background: #F3F4F6; color: var(--text-muted); }
+
+    .error-msg { color: var(--text-error); padding: 20px; text-align: center; background: #FEF2F2; border-radius: var(--radius); margin-bottom: 20px; }
+
+    /* ---- Filter bar ---------------------------------------------------- */
+    .filter-bar {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
+    }
+    .filter-bar span { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-right: 4px; }
+    .filter-btn {
+      padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .filter-btn:hover { border-color: var(--blue-accent); color: var(--blue-accent); }
+    .filter-btn.active {
+      background: var(--blue-primary); border-color: var(--blue-primary);
+      color: white;
+    }
+    .search-input {
+      margin-left: auto;
+      padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border);
+      font-size: 13px; outline: none; width: 170px;
+    }
+    .search-input:focus { border-color: var(--blue-accent); }
+
+    .date-filter {
+      display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text-muted);
+    }
+    .date-input {
+      padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border);
+      font-size: 12px; font-family: inherit; outline: none;
+    }
+    .date-input:focus { border-color: var(--blue-accent); }
+  </style>
+</head>
+<body>
+
+  <!-- Access Control -->
+  <div id="loginGate">
+    <h2>Analytics Login</h2>
+    <input type="password" id="passInput" placeholder="Enter password" onkeydown="if(event.key==='Enter') verifyPass()">
+    <button onclick="verifyPass()" id="btnAuth">View Dashboard</button>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="container" id="dashboard">
+    <div class="header">
+      <img src="relaypaylogo.png" alt="RelayPay">
+      <h1>Support Analytics</h1>
+      <button onclick="loadData()" style="margin-left:auto;padding:8px 16px;background:var(--surface);border:1px solid var(--border);border-radius:6px;cursor:pointer;">Refresh</button>
+    </div>
+
+    <div id="errorBox" class="error-msg" style="display:none"></div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Calls</div>
+        <div class="stat-value" id="stat-total">-</div>
+        <div class="stat-sub" id="stat-7d">Last 7 days: -</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Escalation Rate</div>
+        <div class="stat-value" id="stat-esc-rate">-</div>
+        <div class="stat-sub">Calls leading to bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Duration</div>
+        <div class="stat-value" id="stat-duration">-</div>
+        <div class="stat-sub">In seconds</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Resolution Rate</div>
+        <div class="stat-value" id="stat-res-rate">-</div>
+        <div class="stat-sub" id="stat-ratings">Avg Rating: -</div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <span>Filter:</span>
+      <button class="filter-btn active" id="filter-all"     onclick="applyFilter('all')">All Calls</button>
+      <button class="filter-btn"        id="filter-escalated" onclick="applyFilter('escalated')">Escalated</button>
+      <button class="filter-btn"        id="filter-normal"    onclick="applyFilter('normal')">Not Escalated</button>
+      
+      <div class="date-filter" style="margin-left: 12px;">
+        <span>From:</span>
+        <input type="date" id="dateFrom" class="date-input" onchange="applyFilter(activeFilter)">
+        <span>To:</span>
+        <input type="date" id="dateTo" class="date-input" onchange="applyFilter(activeFilter)">
+      </div>
+
+      <span id="display-count" style="margin-left: 12px; font-size: 11px; color: var(--text-muted); font-weight: 400;"></span>
+
+      <input type="text" id="searchInput" class="search-input" placeholder="Search Ref..." oninput="applyFilter(activeFilter)">
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Duration</th>
+            <th>Escalated</th>
+            <th>Ref</th>
+            <th>End Reason</th>
+          </tr>
+        </thead>
+        <tbody id="callsTable">
+          <tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Loading recent calls...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Config
+    // NOTE: This is a browser JS check, not cryptographic security.
+    const EXPECTED_PASS = "admin123";
+    const ANALYTICS_WEBHOOK = "https://cohort2pod3.app.n8n.cloud/webhook/relaypay-analytics";
+    const WEBHOOK_SECRET = "61ccd07b709f36371376adca4fa691b39cd90ea5244fb8b1";
+
+    // All calls stored after fetch — filter operates on this client-side
+    let allCalls = [];
+    let activeFilter = 'all';
+
+    function verifyPass() {
+      const input = document.getElementById("passInput").value;
+      if (input === EXPECTED_PASS) {
+        document.getElementById("loginGate").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        loadData();
+      } else {
+        alert("Incorrect password");
+      }
+    }
+
+    async function loadData() {
+      try {
+        // Bypassing CORS Preflight by sending token in Query
+        const res = await fetch(`${ANALYTICS_WEBHOOK}?token=${WEBHOOK_SECRET}`);
+        if (!res.ok) throw new Error("Webhook returned " + res.status);
+        const data = await res.json();
+
+        document.getElementById("errorBox").style.display = "none";
+        allCalls = data.recent_calls || [];
+        renderStats(data);
+      } catch (err) {
+        document.getElementById("errorBox").textContent = "Failed to load analytics: " + err.message;
+        document.getElementById("errorBox").style.display = "block";
+      }
+    }
+
+    function applyFilter(filter) {
+      activeFilter = filter;
+      const searchTerm = document.getElementById("searchInput").value.trim().toLowerCase();
+      const dateFrom   = document.getElementById("dateFrom").value;
+      const dateTo     = document.getElementById("dateTo").value;
+
+      // Update button states
+      ['all', 'escalated', 'normal'].forEach(f => {
+        document.getElementById('filter-' + f).classList.toggle('active', f === filter);
+      });
+
+      // 1. Initial filter by status
+      let filtered = allCalls;
+      if (filter === 'escalated') filtered = allCalls.filter(c => c.escalated);
+      if (filter === 'normal')    filtered = allCalls.filter(c => !c.escalated);
+
+      // 2. Filter by date range
+      if (dateFrom || dateTo) {
+        filtered = filtered.filter(c => {
+          const callDate = new Date(c.started_at);
+          // Zero out time for comparison
+          callDate.setHours(0, 0, 0, 0);
+          
+          if (dateFrom) {
+            const from = new Date(dateFrom);
+            from.setHours(0, 0, 0, 0);
+            if (callDate < from) return false;
+          }
+          if (dateTo) {
+            const to = new Date(dateTo);
+            to.setHours(0, 0, 0, 0);
+            if (callDate > to) return false;
+          }
+          return true;
+        });
+      }
+
+      // 3. Filter by search term
+      if (searchTerm) {
+        filtered = filtered.filter(c => 
+          (c.escalation_ref && c.escalation_ref.toLowerCase().includes(searchTerm)) ||
+          (c.call_id && c.call_id.toLowerCase().includes(searchTerm))
+        );
+      }
+
+      renderTable(filtered);
+    }
+
+    function renderStats(data) {
+      document.getElementById("stat-total").textContent = data.total_calls || 0;
+      document.getElementById("stat-7d").textContent = `Last 7 days: ${data.calls_last_7d || 0}`;
+
+      const escRate = data.total_calls ? Math.round((data.escalated_calls / data.total_calls) * 100) : 0;
+      document.getElementById("stat-esc-rate").textContent = escRate + "%";
+
+      document.getElementById("stat-duration").textContent = Math.round(data.avg_duration_s || 0) + "s";
+
+      const surveys = data.surveys || { total: 0, answered_positive: 0, avg_rating: 0 };
+      const resRate = surveys.total ? Math.round((surveys.answered_positive / surveys.total) * 100) : 0;
+      document.getElementById("stat-res-rate").textContent = surveys.total ? (resRate + "%") : "N/A";
+      document.getElementById("stat-ratings").textContent = `Avg rating: ${Number(surveys.avg_rating || 0).toFixed(1)}/5 (${surveys.total} total)`;
+
+      renderTable(allCalls);
+    }
+
+    function renderTable(calls) {
+      const tb = document.getElementById("callsTable");
+      tb.innerHTML = "";
+      
+      const countEl = document.getElementById("display-count");
+      if (countEl) countEl.textContent = calls ? `Showing ${calls.length} entries` : "";
+
+      if (!calls || calls.length === 0) {
+        tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">No calls match this filter</td></tr>';
+        return;
+      }
+
+      calls.forEach(c => {
+        const tr = document.createElement("tr");
+        const dateStr = new Date(c.started_at).toLocaleString('en-GB', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const escBadge = c.escalated
+          ? `<span class="badge yes">Yes</span>`
+          : `<span class="badge no">No</span>`;
+
+        tr.innerHTML = `
+          <td>${dateStr}</td>
+          <td>${c.duration_s}s</td>
+          <td>${escBadge}</td>
+          <td style="font-family:monospace;color:var(--blue-accent)">${c.escalation_ref || '-'}</td>
+          <td style="color:var(--text-muted);font-size:12px">${c.end_reason || 'unknown'}</td>
+        `;
+        tb.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RelayPay — Secure B2B Cross-Border Payments</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230A2463'/><text x='5' y='24' font-size='22' font-family='sans-serif' fill='white' font-weight='700'>R</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue-primary: #0A2463;
+      --blue-accent:  #1E7AC5;
+      --bg:           #F5F6F8;
+      --surface:      #FFFFFF;
+      --border:       #DDE1E7;
+      --text-primary: #111827;
+      --text-muted:   #6B7280;
+      --radius:       10px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ── Nav ─────────────────────────────────────────── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-mark {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .logo-mark img {
+      height: 28px;
+      width: auto;
+      display: block;
+    }
+
+    .nav-logo span {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blue-primary);
+      letter-spacing: -0.3px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color 0.15s;
+    }
+
+    .nav-links a:hover { color: var(--blue-primary); }
+
+    .btn-nav {
+      padding: 8px 18px;
+      background: var(--blue-primary);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .btn-nav:hover { background: var(--blue-accent); color: #fff; }
+
+    /* ── Hero ────────────────────────────────────────── */
+    .hero {
+      background: var(--blue-primary);
+      color: #fff;
+      padding: 96px 40px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.85);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      max-width: 700px;
+      margin: 0 auto 20px;
+    }
+
+    .hero h1 span { color: #60A5FA; }
+
+    .hero p {
+      font-size: 18px;
+      color: rgba(255,255,255,0.7);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      padding: 13px 28px;
+      background: var(--blue-accent);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-primary:hover { background: #1a6db5; }
+
+    .btn-outline {
+      padding: 13px 28px;
+      background: transparent;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.3);
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .btn-outline:hover {
+      border-color: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.06);
+    }
+
+    /* ── Stats bar ───────────────────────────────────── */
+    .stats {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 32px 40px;
+      display: flex;
+      justify-content: center;
+      gap: 64px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--blue-primary);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ── Features ────────────────────────────────────── */
+    .section {
+      padding: 80px 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--blue-accent);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(24px, 3vw, 36px);
+      font-weight: 700;
+      color: var(--blue-primary);
+      letter-spacing: -0.3px;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 540px;
+      line-height: 1.6;
+      margin-bottom: 48px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background: #EFF6FF;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .feature-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--blue-accent);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .feature-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--blue-primary);
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ── How it works ────────────────────────────────── */
+    .how-bg {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 32px;
+    }
+
+    .step {
+      text-align: center;
+    }
+
+    .step-num {
+      width: 40px;
+      height: 40px;
+      background: var(--blue-primary);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .step h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--blue-primary);
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ── Support CTA ─────────────────────────────────── */
+    .support-cta {
+      background: var(--blue-primary);
+      border-radius: var(--radius);
+      padding: 56px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .support-cta-text h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .support-cta-text p {
+      font-size: 15px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.5;
+      max-width: 460px;
+    }
+
+    .support-cta-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .btn-support {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 24px;
+      background: var(--blue-accent);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+
+    .btn-support svg {
+      width: 18px;
+      height: 18px;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .btn-support:hover { background: #1a6db5; }
+
+    .btn-email {
+      padding: 13px 24px;
+      background: transparent;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.3);
+      transition: border-color 0.15s;
+    }
+
+    .btn-email:hover { border-color: rgba(255,255,255,0.6); }
+
+    /* ── Footer ──────────────────────────────────────── */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 32px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    footer .nav-logo span { font-size: 15px; }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-size: 13px;
+      color: var(--text-muted);
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover { color: var(--blue-primary); }
+
+    .footer-copy {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 64px 20px; }
+      .stats { gap: 32px; padding: 24px 20px; }
+      .section { padding: 56px 20px; }
+      .support-cta { padding: 36px 24px; }
+      footer { padding: 24px 20px; flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <div class="logo-mark">
+        <img src="relaypaylogo.png" alt="RelayPay">
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#support">Support</a></li>
+    </ul>
+    <a href="support.html" class="btn-nav">Talk to Support</a>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">B2B Cross-Border Payments</div>
+    <h1>Send Business Payments <span>Anywhere in the World</span></h1>
+    <p>RelayPay helps businesses move money across borders — fast, compliantly, and at transparent rates.</p>
+    <div class="hero-actions">
+      <a href="support.html" class="btn-primary">Talk to Support</a>
+      <a href="#features" class="btn-outline">Learn More</a>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">130+</div>
+      <div class="stat-label">Countries supported</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">2–5</div>
+      <div class="stat-label">Business days per transfer</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">40+</div>
+      <div class="stat-label">Currencies available</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">24/7</div>
+      <div class="stat-label">Voice support</div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="section-label">Platform</div>
+    <h2 class="section-title">Everything your business needs for international payments</h2>
+    <p class="section-sub">Built for compliance-heavy corridors, multi-currency operations, and businesses that can't afford payment delays.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3>International Transfers</h3>
+        <p>Send payments to 130+ countries in 40+ currencies with transparent fees and real-time exchange rates.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <h3>Multi-Currency Invoicing</h3>
+        <p>Create, send, and manage invoices in your supplier's currency. Eliminate FX disputes before they start.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3>Compliance & KYB</h3>
+        <p>Built-in KYB/KYC verification and AML screening so your business stays compliant across every corridor.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Fast Settlement</h3>
+        <p>Most transfers settle within 2 to 5 business days. Priority corridors available for time-sensitive payments.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h3>Business Dashboard</h3>
+        <p>Track payments, manage beneficiaries, and view transaction history from one clean interface.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+        <h3>Voice Support</h3>
+        <p>Speak directly with our AI support agent any time. Get answers about transfers, fees, and your account instantly.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <div class="how-bg" id="how-it-works">
+    <section class="section">
+      <div class="section-label">Process</div>
+      <h2 class="section-title">How RelayPay works</h2>
+      <p class="section-sub">From onboarding to settled payment in four steps.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Create your account</h3>
+          <p>Register your business and complete KYB verification. Most approvals complete within 24 hours.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Add a beneficiary</h3>
+          <p>Enter your supplier or partner's bank details. We validate them before any funds move.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Initiate a transfer</h3>
+          <p>Choose the amount, currency, and purpose. Review the rate and fee before confirming.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <h3>Payment settles</h3>
+          <p>Funds arrive in 2 to 5 business days. Track progress from your dashboard in real time.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Support CTA -->
+  <section class="section" id="support">
+    <div class="support-cta">
+      <div class="support-cta-text">
+        <h2>Need help with your account?</h2>
+        <p>Our AI support agent is available now to answer questions about transfers, fees, compliance, and your RelayPay account. For complex issues, we'll connect you with the team directly.</p>
+      </div>
+      <div class="support-cta-actions">
+        <a href="support.html" class="btn-support">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Talk to Support
+        </a>
+        <a href="mailto:support@relaypay.io" class="btn-email">Email Us</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <a href="index.html" class="nav-logo">
+      <div class="logo-mark">
+        <img src="relaypaylogo.png" alt="RelayPay">
+      </div>
+    </a>
+    <ul class="footer-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="support.html">Support</a></li>
+      <li><a href="admin.html" style="font-size: 11px; opacity: 0.5;">Team Access</a></li>
+      <li><a href="mailto:support@relaypay.io">Contact</a></li>
+    </ul>
+    <span class="footer-copy">&copy; 2026 RelayPay. All rights reserved.</span>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RelayPay Support</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230A2463'/><text x='5' y='24' font-size='22' font-family='sans-serif' fill='white' font-weight='700'>R</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ---- Brand Tokens -------------------------------------------------- */
+    :root {
+      --blue-primary:   #0A2463;
+      --blue-accent:    #1E7AC5;
+      --bg:             #F5F6F8;
+      --surface:        #FFFFFF;
+      --border:         #DDE1E7;
+      --text-primary:   #111827;
+      --text-muted:     #6B7280;
+      --text-error:     #DC2626;
+      --status-idle:    #D1D5DB;
+      --status-active:  #1E7AC5;
+      --status-speak:   #0A2463;
+      --radius:         10px;
+    }
+
+    /* ---- Reset --------------------------------------------------------- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* ---- Card ---------------------------------------------------------- */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* ---- Header -------------------------------------------------------- */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .logo-mark {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .logo-mark img {
+      height: 22px;
+      width: auto;
+      display: block;
+    }
+
+    .header-text h1 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--blue-primary);
+      line-height: 1.2;
+    }
+
+    .header-text p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ---- Divider ------------------------------------------------------- */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 24px;
+    }
+
+    /* ---- Form ---------------------------------------------------------- */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--blue-accent);
+    }
+
+    input.error {
+      border-color: var(--text-error);
+    }
+
+    .field-error {
+      font-size: 12px;
+      color: var(--text-error);
+      margin-top: 4px;
+      display: none;
+    }
+
+    .field-error.visible {
+      display: block;
+    }
+
+    /* ---- Consent ------------------------------------------------------- */
+    .consent {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: 6px;
+    }
+
+    .consent input[type="checkbox"] {
+      margin-top: 2px;
+      accent-color: var(--blue-primary);
+      flex-shrink: 0;
+    }
+
+    .consent p {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ---- Start Button -------------------------------------------------- */
+    .btn-start {
+      width: 100%;
+      padding: 12px;
+      background: var(--blue-primary);
+      color: #FFFFFF;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-start:hover:not(:disabled) { background: var(--blue-accent); }
+    .btn-start:active:not(:disabled) { transform: scale(0.99); }
+    .btn-start:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ---- Call UI ------------------------------------------------------- */
+    .call-ui { display: none; }
+    .call-ui.visible { display: block; }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--status-idle);
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    .status-dot.active   { background: var(--status-active); }
+    .status-dot.speaking {
+      background: var(--status-speak);
+      opacity: 0.8;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.6; }
+    }
+
+    .status-text {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ---- Transcript ---------------------------------------------------- */
+    .transcript {
+      background: var(--bg);
+      border-radius: 6px;
+      padding: 14px;
+      min-height: 100px;
+      max-height: 220px;
+      overflow-y: auto;
+      margin-bottom: 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .transcript-entry { margin-bottom: 8px; }
+    .transcript-entry:last-child { margin-bottom: 0; }
+    .transcript-entry strong { color: var(--text-primary); }
+
+    .transcript-placeholder {
+      font-style: italic;
+      color: var(--text-muted);
+    }
+
+    /* ---- Identity Panel ------------------------------------------------ */
+    .identity-toggle {
+      font-size: 12px;
+      color: var(--blue-accent);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .identity-toggle:hover { text-decoration: underline; }
+
+    .identity-panel {
+      display: none;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .identity-panel.open { display: block; }
+
+    .identity-panel p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .identity-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .identity-row:last-of-type { margin-bottom: 0; }
+
+    .identity-row input {
+      flex: 1;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .btn-update {
+      padding: 7px 12px;
+      background: var(--blue-primary);
+      color: #fff;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .btn-update:hover { background: var(--blue-accent); }
+
+    .identity-feedback {
+      font-size: 11px;
+      color: #16A34A;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .identity-feedback.visible { display: block; }
+
+    /* ---- End Button ---------------------------------------------------- */
+    .btn-end {
+      width: 100%;
+      padding: 11px;
+      background: transparent;
+      color: var(--text-error);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid var(--text-error);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-end:hover { background: #FEF2F2; }
+
+    /* ---- Retry Button -------------------------------------------------- */
+    .btn-retry {
+      display: none;
+      width: 100%;
+      padding: 12px;
+      background: var(--blue-primary);
+      color: #FFFFFF;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-retry:hover { background: var(--blue-accent); }
+
+    /* ---- New Call Button (summary view) -------------------------------- */
+    .btn-summary {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--blue-primary);
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-summary:hover { background: var(--blue-accent); }
+    .btn-summary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-new-call {
+      display: block;
+      width: 100%;
+      margin-top: 16px;
+      padding: 12px;
+      background: transparent;
+      color: var(--blue-primary);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1.5px solid var(--blue-primary);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-new-call:hover { background: var(--blue-primary); color: #fff; }
+
+    .error-notice {
+      display: none;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #991B1B;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .error-notice.visible { display: block; }
+
+    /* ---- Summary View -------------------------------------------------- */
+    .summary-view { display: none; }
+    .summary-view.visible { display: block; }
+
+    .summary-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .summary-icon {
+      width: 36px;
+      height: 36px;
+      background: #DCFCE7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .summary-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: #16A34A;
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .summary-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .summary-header p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .summary-items {
+      background: var(--bg);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .summary-item {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .summary-item:last-child { border-bottom: none; }
+
+    .summary-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .summary-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .summary-value.ref {
+      font-family: 'Courier New', monospace;
+      color: var(--blue-primary);
+      font-size: 15px;
+    }
+
+    .summary-value.muted {
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .summary-empty {
+      padding: 20px 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ---- Survey Section ------------------------------------------------ */
+    .survey-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 20px;
+    }
+
+    .survey-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .survey-question {
+      margin-bottom: 16px;
+    }
+
+    .survey-question label {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    /* Star rating */
+    .star-rating {
+      display: flex;
+      gap: 4px;
+    }
+
+    .star-rating button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      font-size: 24px;
+      line-height: 1;
+      color: #D1D5DB;
+      transition: color 0.1s;
+    }
+
+    .star-rating button.active { color: #F59E0B; }
+    .star-rating button:hover { color: #F59E0B; }
+
+    /* Answer options */
+    .answer-options {
+      display: flex;
+      gap: 8px;
+    }
+
+    .answer-opt {
+      flex: 1;
+      padding: 8px 4px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .answer-opt:hover { border-color: var(--blue-accent); color: var(--blue-accent); }
+    .answer-opt.selected {
+      background: var(--blue-primary);
+      border-color: var(--blue-primary);
+      color: #fff;
+    }
+
+    textarea.survey-feedback {
+      resize: vertical;
+      min-height: 72px;
+      font-size: 13px;
+    }
+
+    .btn-survey {
+      width: 100%;
+      padding: 11px;
+      background: var(--blue-primary);
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 4px;
+    }
+
+    .btn-survey:hover { background: var(--blue-accent); }
+    .btn-survey:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .survey-thanks {
+      text-align: center;
+      padding: 16px 0 4px;
+      font-size: 14px;
+      color: #16A34A;
+      font-weight: 500;
+      display: none;
+    }
+
+    .survey-thanks.visible { display: block; }
+
+    /* ---- Footer -------------------------------------------------------- */
+    .page-footer {
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <!-- Header -->
+    <div class="header">
+      <a href="index.html" class="btn-back" title="Back to home">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </a>
+      <div class="logo-mark">
+        <img src="relaypaylogo.png" alt="RelayPay">
+      </div>
+      <div class="header-text">
+        <h1>RelayPay Support</h1>
+        <p>Voice-based business support</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Pre-call Form -->
+    <div id="formView">
+      <div class="form-group">
+        <label for="fullName">Full name</label>
+        <input type="text" id="fullName" placeholder="Jane Acme" autocomplete="name">
+        <div class="field-error" id="nameError">Please enter your name.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Business email</label>
+        <input type="email" id="email" placeholder="jane@acme.com" autocomplete="email">
+        <div class="field-error" id="emailError">Please enter a valid email address.</div>
+      </div>
+
+      <div class="consent">
+        <input type="checkbox" id="consentCheck">
+        <p>
+          By starting this call, you agree that your conversation may be
+          transcribed to assist with your support request.
+          Transcripts are stored securely and retained for 90 days.
+        </p>
+      </div>
+
+      <button class="btn-start" id="btnStart" onclick="handleStart()">
+        Start Support Call
+      </button>
+    </div>
+
+    <!-- Active Call UI -->
+    <div class="call-ui" id="callView">
+      <div class="status-row">
+        <div class="status-dot" id="statusDot"></div>
+        <span class="status-text" id="statusText">Connecting...</span>
+      </div>
+
+      <!-- Identity correction panel (collapsed by default) -->
+      <button class="identity-toggle" id="identityToggle" onclick="toggleIdentityPanel()">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Update your details
+      </button>
+
+      <div class="identity-panel" id="identityPanel">
+        <p>If Tomi mishears your name or email, correct them here before booking.</p>
+        <div class="identity-row">
+          <input type="text" id="correctedName" placeholder="Full name">
+          <button class="btn-update" onclick="updateIdentity('name')">Update</button>
+        </div>
+        <div class="identity-row">
+          <input type="email" id="correctedEmail" placeholder="Email address">
+          <button class="btn-update" onclick="updateIdentity('email')">Update</button>
+        </div>
+        <div class="identity-feedback" id="identityFeedback">Details updated — Tomi will use these now.</div>
+      </div>
+
+      <div class="transcript" id="transcript">
+        <span class="transcript-placeholder">Your conversation will appear here.</span>
+      </div>
+
+      <div class="error-notice" id="errorNotice"></div>
+      <button class="btn-end" id="btnEnd" onclick="handleEnd()">End Call</button>
+      <button class="btn-retry" id="btnRetry" onclick="handleRetry()">Try Again</button>
+      <button class="btn-summary" id="btnSummary" onclick="handleViewSummary()" style="display:none">View Call Summary</button>
+    </div>
+
+    <!-- Post-call Summary View -->
+    <div class="summary-view" id="summaryView">
+
+      <div class="summary-header">
+        <div class="summary-icon">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <div>
+          <h2>Call Complete</h2>
+          <p>Thank you for contacting RelayPay.</p>
+        </div>
+      </div>
+
+      <div class="summary-items" id="summaryItems">
+        <!-- Populated by JS after call ends -->
+      </div>
+
+      <!-- Survey -->
+      <div class="survey-divider"></div>
+      <div class="survey-title">How did we do?</div>
+
+      <div id="surveyForm">
+        <div class="survey-question">
+          <label>Rate this interaction</label>
+          <div class="star-rating" id="starRating">
+            <button type="button" data-val="1" onclick="setRating(1)">&#9733;</button>
+            <button type="button" data-val="2" onclick="setRating(2)">&#9733;</button>
+            <button type="button" data-val="3" onclick="setRating(3)">&#9733;</button>
+            <button type="button" data-val="4" onclick="setRating(4)">&#9733;</button>
+            <button type="button" data-val="5" onclick="setRating(5)">&#9733;</button>
+          </div>
+        </div>
+
+        <div class="survey-question">
+          <label>Was your question answered?</label>
+          <div class="answer-options">
+            <button class="answer-opt" onclick="setAnswered('yes')">Yes</button>
+            <button class="answer-opt" onclick="setAnswered('partially')">Partially</button>
+            <button class="answer-opt" onclick="setAnswered('no')">No</button>
+          </div>
+        </div>
+
+        <div class="survey-question">
+          <label for="surveyFeedback">Any additional comments? <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+          <textarea class="survey-feedback" id="surveyFeedback" placeholder="Your feedback..."></textarea>
+        </div>
+
+        <div class="field-error" id="surveyValidation" style="display:none;margin-bottom:8px"></div>
+        <button class="btn-survey" id="btnSurvey" onclick="submitSurvey()">Submit Feedback</button>
+      </div>
+
+      <div class="survey-thanks" id="surveyThanks">Thank you for your feedback!</div>
+
+      <button class="btn-new-call" onclick="handleNewCall()">Start a New Call</button>
+
+    </div>
+
+  </div>
+
+  <p class="page-footer">RelayPay &mdash; Secure Business Payments</p>
+
+  <!-- VAPI Web SDK -->
+  <script type="module" src="support-agent.js"></script>
+
+</body>
+</html>
