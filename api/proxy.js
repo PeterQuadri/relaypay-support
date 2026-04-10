@@ -26,19 +26,18 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing "path" query parameter.' });
   }
 
-  // 3. Construct the n8n URL
-  const n8nBaseUrl = "https://cohort2pod3.app.n8n.cloud/webhook";
-  const targetUrl = `${n8nBaseUrl}/${path}?token=${encodeURIComponent(secret || '')}`;
-
-  console.log(`[Proxy] Forwarding to: ${n8nBaseUrl}/${path}?token=***REDACTED***`);
-
-  // 4. Inject the private Secret from Vercel Environment Variables
+  // 3. Inject the private Secret from Vercel Environment Variables
   const secret = process.env.WEBHOOK_SECRET;
   
   if (!secret) {
      console.error("WEBHOOK_SECRET is not set in Vercel Environment Variables.");
-     // We continue, but n8n will likely reject the request with 401.
   }
+
+  // 4. Construct the n8n URL
+  const n8nBaseUrl = "https://cohort2pod3.app.n8n.cloud/webhook";
+  const targetUrl = `${n8nBaseUrl}/${path}?token=${encodeURIComponent(secret || '')}`;
+
+  console.log(`[Proxy] Forwarding to: ${n8nBaseUrl}/${path}?token=***REDACTED***`);
 
   try {
     // 5. Forward the request to n8n
