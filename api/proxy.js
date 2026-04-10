@@ -29,7 +29,7 @@ export default async function handler(req, res) {
   // 3. Construct the n8n URL
   // We assume all your webhooks are on the same n8n instance.
   const n8nBaseUrl = "https://cohort2pod3.app.n8n.cloud/webhook";
-  const targetUrl = `${n8nBaseUrl}/${path}`;
+  const targetUrl = `${n8nBaseUrl}/${path}?token=${secret || ''}`;
 
   // 4. Inject the private Secret from Vercel Environment Variables
   const secret = process.env.WEBHOOK_SECRET;
