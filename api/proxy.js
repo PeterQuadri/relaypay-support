@@ -27,9 +27,10 @@ export default async function handler(req, res) {
   }
 
   // 3. Construct the n8n URL
-  // We assume all your webhooks are on the same n8n instance.
   const n8nBaseUrl = "https://cohort2pod3.app.n8n.cloud/webhook";
-  const targetUrl = `${n8nBaseUrl}/${path}?token=${secret || ''}`;
+  const targetUrl = `${n8nBaseUrl}/${path}?token=${encodeURIComponent(secret || '')}`;
+
+  console.log(`[Proxy] Forwarding to: ${n8nBaseUrl}/${path}?token=***REDACTED***`);
 
   // 4. Inject the private Secret from Vercel Environment Variables
   const secret = process.env.WEBHOOK_SECRET;
@@ -45,15 +46,23 @@ export default async function handler(req, res) {
       method: req.method,
       headers: {
         'Content-Type': 'application/json',
-        'x-webhook-secret': secret || '' // Changed from x-webhook-token to match n8n
+        'x-webhook-secret': secret || ''
       },
-      body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined,
+      body: req.method !== 'GET' && req.method !== 'OPTIONS' ? JSON.stringify(req.body) : undefined,
     });
 
-    const data = await response.json();
+    // 6. Handle the response safely, even if n8n returns an error string instead of JSON
+    const contentType = response.headers.get("content-type");
+    let responseBody;
     
-    // 6. Return n8n's response to the browser
-    return res.status(response.status).json(data);
+    if (contentType && contentType.includes("application/json")) {
+      responseBody = await response.json();
+    } else {
+      responseBody = { message: await response.text() };
+    }
+    
+    // 7. Return n8n's status and body to the browser
+    return res.status(response.status).json(responseBody);
 
   } catch (error) {
     console.error('Proxy Error:', error);
