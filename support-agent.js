@@ -198,7 +198,7 @@ window.submitSurvey = async function () {
   btn.textContent = "Submitting...";
 
   try {
-    await fetchWithTimeout(`${SURVEY_WEBHOOK}?token=${WEBHOOK_SECRET}`, {
+    await fetchWithTimeout(`${SURVEY_WEBHOOK}`, {
       method: "POST",
       headers: webhookHeaders(),
       body: JSON.stringify({

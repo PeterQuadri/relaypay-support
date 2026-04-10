@@ -91,7 +91,7 @@ async function verifyToken(token) {
   msgEl.style.display = "block";
 
   try {
-    const res = await fetch(`${AUTH_VERIFY_WEBHOOK}?token=${WEBHOOK_SECRET}`, {
+    const res = await fetch(`${AUTH_VERIFY_WEBHOOK}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token })
@@ -131,7 +131,7 @@ window.requestMagicLink = async () => {
   try {
     // Simplified fetch to bypass CORS 'Preflight' issues.
     // We send the token in the URL for better reliability across environments.
-    const res = await fetch(`${AUTH_REQUEST_WEBHOOK}?token=${WEBHOOK_SECRET}`, {
+    const res = await fetch(`${AUTH_REQUEST_WEBHOOK}`, {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, redirect_to: 'admin.html' })
@@ -219,7 +219,7 @@ function loadView(viewId) {
 
 async function loadAnalyticsData() {
   try {
-    const res = await fetch(`${ANALYTICS_WEBHOOK}?token=${WEBHOOK_SECRET}`);
+    const res = await fetch(`${ANALYTICS_WEBHOOK}`);
     
     if (!res.ok) {
       if (res.status === 401) throw new Error("Unauthorized: Invalid dashboard secret.");
@@ -361,7 +361,7 @@ window.resolveInteraction = async (callId) => {
   if (!confirm("Mark this escalation as resolved?")) return;
 
   try {
-    const res = await fetch(`${RESOLVE_WEBHOOK}?token=${WEBHOOK_SECRET}`, {
+    const res = await fetch(`${RESOLVE_WEBHOOK}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ callId })
@@ -428,7 +428,7 @@ window.teamAction = async (id, type) => {
   const webhook = type === 'revoke' ? TEAM_REVOKE_WEBHOOK : TEAM_RESTORE_WEBHOOK;
 
   try {
-    const res = await fetch(`${webhook}?token=${WEBHOOK_SECRET}`, {
+    const res = await fetch(`${webhook}`, {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })
@@ -463,7 +463,7 @@ window.handleInvite = async () => {
   btn.textContent = "Inviting...";
 
   try {
-    const res = await fetch(`${TEAM_ADD_WEBHOOK}?token=${WEBHOOK_SECRET}`, {
+    const res = await fetch(`${TEAM_ADD_WEBHOOK}`, {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, role })
@@ -599,7 +599,7 @@ async function parseDOCX(file) {
 window.loadKBStatus = async () => {
   const tbody = document.getElementById('kbTableBody');
   try {
-    const res = await fetch(`${KB_STATUS_WEBHOOK}?token=${WEBHOOK_SECRET}`);
+    const res = await fetch(`${KB_STATUS_WEBHOOK}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Failed loading KB stats");
     
@@ -639,7 +639,7 @@ window.loadKBStatus = async () => {
 window.loadIngestionLogs = async () => {
   const tbody = document.getElementById('logsTableBody');
   try {
-    const res = await fetch(`${KB_LOGS_WEBHOOK}?token=${WEBHOOK_SECRET}`);
+    const res = await fetch(`${KB_LOGS_WEBHOOK}`);
     const data = await res.json();
     if (!res.ok) throw Error(data.error || "Failed to load logs");
     
@@ -698,7 +698,7 @@ window.closeDeleteModal = () => {
 window.confirmDelete = async () => {
   if(!kbSourceToDelete) return;
   try {
-    const res = await fetch(`${KB_DELETE_WEBHOOK}?token=${WEBHOOK_SECRET}`, {
+    const res = await fetch(`${KB_DELETE_WEBHOOK}`, {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ source: kbSourceToDelete })
@@ -725,7 +725,7 @@ window.submitIngestion = async () => {
   alertBox.style.display = 'none';
 
   try {
-    const res = await fetch(`${KB_INGEST_WEBHOOK}?token=${WEBHOOK_SECRET}`, {
+    const res = await fetch(`${KB_INGEST_WEBHOOK}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ source, mode, content: kbProcessingText })
