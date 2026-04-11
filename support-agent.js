@@ -408,7 +408,7 @@ function injectIdentityCorrection() {
     type: "add-message",
     message: {
       role:    "system",
-      content: `Caller correction: their name is "${userData.name}" and email is "${userData.email}". Use these exact values for any booking or escalation.`,
+      content: `Caller correction: the customer_name is "${userData.name}" and customer_email is "${userData.email}". Use these exact values for any booking or escalation.`,
     },
   });
   const fb = document.getElementById("identityFeedback");
@@ -436,7 +436,6 @@ async function fetchAndShowSummary() {
       if (currentCallId) params.set("call_id", currentCallId);
       if (userData.email) params.set("email", userData.email);
       if (callStartedAt) params.set("started_after", callStartedAt);
-      params.set("token", WEBHOOK_SECRET);
       const res = await fetchWithTimeout(
         `${CALL_SUMMARY_WEBHOOK}?${params}`,
         { headers: webhookHeaders() },
